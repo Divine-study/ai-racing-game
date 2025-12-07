@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Racing Championship - Ultimate Racing Experience</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #gameContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        #gameTitle {
+            color: white;
+            font-size: 3em;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        #gameCanvas {
+            border: 5px solid #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            background: #2d3436;
+            display: block;
+        }
+
+        #controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        #stats {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            min-width: 250px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+
+        .stat-item {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-label {
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .stat-value {
+            color: #00ff00;
+            font-size: 18px;
+        }
+
+        #leaderboard {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 200px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+
+        .leaderboard-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 2px solid #ffd700;
+            padding-bottom: 10px;
+        }
+
+        .racer-item {
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .racer-player {
+            background: rgba(0,255,0,0.2);
+            border-left: 3px solid #00ff00;
+        }
+
+        .racer-ai {
+            border-left: 3px solid #ff6b6b;
+        }
+
+        #gameOver {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.95);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.8);
+            min-width: 400px;
+        }
+
+        .game-over-title {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .final-stats {
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+
+        #instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 14px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+
+        .key {
+            display: inline-block;
+            background: #667eea;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin: 0 5px;
+            font-weight: bold;
+        }
+
+        #powerups {
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+
+        .powerup-item {
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(255,215,0,0.2);
+            border-radius: 5px;
+            border-left: 3px solid #ffd700;
+        }
+
+        .difficulty-selector {
+            margin: 10px 0;
+        }
+
+        .difficulty-btn {
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: 2px solid white;
+            background: transparent;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .difficulty-btn.active {
+            background: #ffd700;
+            color: black;
+            border-color: #ffd700;
+        }
+
+        @media (max-width: 768px) {
+            #gameTitle {
+                font-size: 2em;
+            }
+            
+            #stats, #leaderboard {
+                font-size: 12px;
+                padding: 10px;
+                min-width: 150px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <h1 id="gameTitle">🏎️ AI RACING CHAMPIONSHIP 🏁</h1>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="controls">
+            <button class="btn btn-success" onclick="startGame()">🚀 Start Race</button>
+            <button class="btn btn-warning" onclick="pauseGame()">⏸️ Pause</button>
+            <button class="btn btn-danger" onclick="resetGame()">🔄 Reset</button>
+            <button class="btn btn-primary" onclick="toggleAI()">🤖 Toggle AI</button>
+        </div>
+        <div class="difficulty-selector">
+            <button class="difficulty-btn active" onclick="setDifficulty('easy')">Easy</button>
+            <button class="difficulty-btn" onclick="setDifficulty('medium')">Medium</button>
+            <button class="difficulty-btn" onclick="setDifficulty('hard')">Hard</button>
+            <button class="difficulty-btn" onclick="setDifficulty('extreme')">Extreme</button>
+        </div>
+    </div>
+
+    <div id="stats">
+        <div class="stat-item">
+            <span class="stat-label">Speed:</span>
+            <span class="stat-value" id="speedStat">0 km/h</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Lap:</span>
+            <span class="stat-value" id="lapStat">1/5</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Position:</span>
+            <span class="stat-value" id="positionStat">1/6</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Best Lap:</span>
+            <span class="stat-value" id="bestLapStat">--:--</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Score:</span>
+            <span class="stat-value" id="scoreStat">0</span>
+        </div>
+    </div>
+
+    <div id="leaderboard">
+        <div class="leaderboard-title">🏆 LEADERBOARD</div>
+        <div id="racerList"></div>
+    </div>
+
+    <div id="powerups">
+        <div style="font-weight: bold; color: #ffd700; margin-bottom: 10px;">⚡ POWER-UPS</div>
+        <div id="powerupList"></div>
+    </div>
+
+    <div id="instructions">
+        <span class="key">↑</span> Accelerate
+        <span class="key">↓</span> Brake
+        <span class="key">←</span> Left
+        <span class="key">→</span> Right
+        <span class="key">SPACE</span> Boost
+    </div>
+
+    <div id="gameOver">
+        <div class="game-over-title">🏁 RACE FINISHED!</div>
+        <div class="final-stats" id="finalStats"></div>
+        <button class="btn btn-success" onclick="resetGame()" style="margin-top: 20px;">🔄 Race Again</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Game State
+        let gameState = {
+            running: false,
+            paused: false,
+            difficulty: 'easy',
+            totalLaps: 5,
+            aiEnabled: true
+        };
+
+        // Player Car
+        let player = {
+            x: 100,
+            y: 300,
+            width: 40,
+            height: 60,
+            speed: 0,
+            maxSpeed: 8,
+            acceleration: 0.3,
+            friction: 0.05,
+            angle: 0,
+            turnSpeed: 0.08,
+            color: '#00ff00',
+            lap: 1,
+            checkpoints: [false, false, false, false],
+            lapTimes: [],
+            currentLapStart: Date.now(),
+            score: 0,
+            boost: 100,
+            powerups: []
+        };
+
+        // AI Cars
+        let aiCars = [];
+        const aiColors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a8e6cf', '#ff8b94'];
+        const aiNames = ['Speedy AI', 'Turbo Bot', 'Racer X', 'Lightning', 'Thunder'];
+
+        // Track
+        const track = {
+            centerX: canvas.width / 2,
+            centerY: canvas.height / 2,
+            outerRadius: 250,
+            innerRadius: 150,
+            checkpoints: [
+                { angle: 0, passed: false },
+                { angle: Math.PI / 2, passed: false },
+                { angle: Math.PI, passed: false },
+                { angle: 3 * Math.PI / 2, passed: false }
+            ]
+        };
+
+        // Powerups
+        let powerups = [];
+        const powerupTypes = [
+            { type: 'speed', color: '#ffd700', effect: 'Speed Boost', duration: 3000 },
+            { type: 'shield', color: '#00ffff', effect: 'Shield', duration: 5000 },
+            { type: 'slow', color: '#ff00ff', effect: 'Slow Others', duration: 2000 }
+        ];
+
+        // Obstacles
+        let obstacles = [];
+
+        // Difficulty Settings
+        const difficultySettings = {
+            easy: { aiSpeed: 0.7, aiAccuracy: 0.6, obstacleCount: 3 },
+            medium: { aiSpeed: 0.85, aiAccuracy: 0.75, obstacleCount: 5 },
+            hard: { aiSpeed: 1.0, aiAccuracy: 0.85, obstacleCount: 7 },
+            extreme: { aiSpeed: 1.2, aiAccuracy: 0.95, obstacleCount: 10 }
+        };
+
+        // Initialize AI Cars
+        function initAICars() {
+            aiCars = [];
+            for (let i = 0; i < 5; i++) {
+                const angle = (Math.PI * 2 / 6) * (i + 1);
+                const radius = (track.outerRadius + track.innerRadius) / 2;
+                aiCars.push({
+                    x: track.centerX + Math.cos(angle) * radius,
+                    y: track.centerY + Math.sin(angle) * radius,
+                    width: 40,
+                    height: 60,
+                    speed: 0,
+                    maxSpeed: 7 * difficultySettings[gameState.difficulty].aiSpeed,
+                    acceleration: 0.25,
+                    friction: 0.05,
+                    angle: angle + Math.PI / 2,
+                    turnSpeed: 0.07,
+                    color: aiColors[i],
+                    name: aiNames[i],
+                    lap: 1,
+                    checkpoints: [false, false, false, false],
+                    targetAngle: 0,
+                    aiAccuracy: difficultySettings[gameState.difficulty].aiAccuracy,
+                    slowEffect: 0
+                });
+            }
+        }
+
+        // Initialize Powerups
+        function initPowerups() {
+            powerups = [];
+            for (let i = 0; i < 8; i++) {
+                const angle = (Math.PI * 2 / 8) * i;
+                const radius = (track.outerRadius + track.innerRadius) / 2;
+                const powerupType = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
+                powerups.push({
+                    x: track.centerX + Math.cos(angle) * radius,
+                    y: track.centerY + Math.sin(angle) * radius,
+                    radius: 15,
+                    active: true,
+                    respawnTime: 0,
+                    ...powerupType
+                });
+            }
+        }
+
+        // Initialize Obstacles
+        function initObstacles() {
+            obstacles = [];
+            const count = difficultySettings[gameState.difficulty].obstacleCount;
+            for (let i = 0; i < count; i++) {
+                const angle = (Math.PI * 2 / count) * i + Math.random() * 0.5;
+                const radius = track.innerRadius + Math.random() * (track.outerRadius - track.innerRadius);
+                obstacles.push({
+                    x: track.centerX + Math.cos(angle) * radius,
+                    y: track.centerY + Math.sin(angle) * radius,
+                    radius: 20,
+                    color: '#ff0000'
+                });
+            }
+        }
+
+        // Draw Track
+        function drawTrack() {
+            // Outer circle
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.arc(track.centerX, track.centerY, track.outerRadius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Inner circle
+            ctx.beginPath();
+            ctx.arc(track.centerX, track.centerY, track.innerRadius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Track surface
+            ctx.fillStyle = '#555';
+            ctx.beginPath();
+            ctx.arc(track.centerX, track.centerY, track.outerRadius, 0, Math.PI * 2);
+            ctx.arc(track.centerX, track.centerY, track.innerRadius, 0, Math.PI * 2, true);
+            ctx.fill();
+
+            // Checkpoints
+            track.checkpoints.forEach((cp, i) => {
+                const radius = (track.outerRadius + track.innerRadius) / 2;
+                const x = track.centerX + Math.cos(cp.angle) * radius;
+                const y = track.centerY + Math.sin(cp.angle) * radius;
+                
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath();
+                ctx.arc(x, y, 10, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(i + 1, x, y + 4);
+            });
+
+            // Start/Finish line
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([10, 5]);
+            ctx.beginPath();
+            ctx.moveTo(track.centerX + track.innerRadius, track.centerY);
+            ctx.lineTo(track.centerX + track.outerRadius, track.centerY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // Draw Car
+        function drawCar(car, isPlayer = false) {
+            ctx.save();
+            ctx.translate(car.x, car.y);
+            ctx.rotate(car.angle);
+
+            // Car body
+            ctx.fillStyle = car.color;
+            ctx.fillRect(-car.width / 2, -car.height / 2, car.width, car.height);
+
+            // Car details
+            ctx.fillStyle = '#000';
+            ctx.fillRect(-car.width / 2 + 5, -car.height / 2 + 10, 10, 15);
+            ctx.fillRect(car.width / 2 - 15, -car.height / 2 + 10, 10, 15);
+
+            // Windshield
+            ctx.fillStyle = 'rgba(135, 206, 250, 0.5)';
+            ctx.fillRect(-car.width / 2 + 5, -car.height / 2 + 5, car.width - 10, 20);
+
+            if (isPlayer) {
+                // Player indicator
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath();
+                ctx.arc(0, -car.height / 2 - 15, 8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Shield effect
+            if (car.powerups && car.powerups.some(p => p.type === 'shield')) {
+                ctx.strokeStyle = '#00ffff';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(0, 0, car.width, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+
+            // Name tag for AI
+            if (!isPlayer) {
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(car.name, car.x, car.y - car.height);
+            }
+        }
+
+        // Draw Powerups
+        function drawPowerups() {
+            powerups.forEach(powerup => {
+                if (powerup.active) {
+                    ctx.fillStyle = powerup.color;
+                    ctx.beginPath();
+                    ctx.arc(powerup.x, powerup.y, powerup.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    // Pulsing effect
+                    const pulse = Math.sin(Date.now() / 200) * 3;
+                    ctx.strokeStyle = powerup.color;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(powerup.x, powerup.y, powerup.radius + pulse, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            });
+        }
+
+        // Draw Obstacles
+        function drawObstacles() {
+            obstacles.forEach(obstacle => {
+                ctx.fillStyle = obstacle.color;
+                ctx.beginPath();
+                ctx.arc(obstacle.x, obstacle.y, obstacle.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Warning stripes
+                ctx.strokeStyle = '#ffff00';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.arc(obstacle.x, obstacle.y, obstacle.radius + 5, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            });
+        }
+
+        // Update Player
+        function updatePlayer() {
+            // Apply friction
+            player.speed *= (1 - player.friction);
+
+            // Update position
+            player.x += Math.cos(player.angle) * player.speed;
+            player.y += Math.sin(player.angle) * player.speed;
+
+            // Check track boundaries
+            const distFromCenter = Math.sqrt(
+                Math.pow(player.x - track.centerX, 2) + 
+                Math.pow(player.y - track.centerY, 2)
+            );
+
+            if (distFromCenter > track.outerRadius - player.width / 2 || 
+                distFromCenter < track.innerRadius + player.width / 2) {
+                player.speed *= 0.5; // Slow down when hitting walls
+                player.score = Math.max(0, player.score - 10);
+            }
+
+            // Check checkpoints
+            checkCheckpoints(player);
+
+            // Update powerups
+            player.powerups = player.powerups.filter(p => {
+                if (Date.now() - p.startTime > p.duration) {
+                    return false;
+                }
+                return true;
+            });
+
+            // Regenerate boost
+            if (player.boost < 100) {
+                player.boost += 0.2;
+            }
+
+            // Update score
+            player.score += Math.floor(player.speed);
+        }
+
+        // AI Logic
+        function updateAI(car) {
+            // Calculate target position (next checkpoint)
+            const nextCheckpoint = car.checkpoints.findIndex(cp => !cp);
+            const targetAngle = track.checkpoints[nextCheckpoint === -1 ? 0 : nextCheckpoint].angle;
+            const targetRadius = (track.outerRadius + track.innerRadius) / 2;
+            const targetX = track.centerX + Math.cos(targetAngle) * targetRadius;
+            const targetY = track.centerY + Math.sin(targetAngle) * targetRadius;
+
+            // Calculate angle to target
+            const angleToTarget = Math.atan2(targetY - car.y, targetX - car.x);
+            let angleDiff = angleToTarget - car.angle;
+
+            // Normalize angle difference
+            while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+            while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+
+            // Turn towards target with AI accuracy
+            if (Math.abs(angleDiff) > 0.1) {
+                car.angle += Math.sign(angleDiff) * car.turnSpeed * car.aiAccuracy;
+            }
+
+            // Accelerate
+            const slowMultiplier = car.slowEffect > 0 ? 0.5 : 1;
+            if (car.speed < car.maxSpeed * slowMultiplier) {
+                car.speed += car.acceleration;
+            }
+
+            // Apply friction
+            car.speed *= (1 - car.friction);
+
+            // Update position
+            car.x += Math.cos(car.angle) * car.speed;
+            car.y += Math.sin(car.angle) * car.speed;
+
+            // Check track boundaries
+            const distFromCenter = Math.sqrt(
+                Math.pow(car.x - track.centerX, 2) + 
+                Math.pow(car.y - track.centerY, 2)
+            );
+
+            if (distFromCenter > track.outerRadius - car.width / 2 || 
+                distFromCenter < track.innerRadius + car.width / 2) {
+                car.speed *= 0.7;
+                // Correct position
+                const correctionAngle = Math.atan2(car.y - track.centerY, car.x - track.centerX);
+                const idealRadius = (track.outerRadius + track.innerRadius) / 2;
+                car.x = track.centerX + Math.cos(correctionAngle) * idealRadius;
+                car.y = track.centerY + Math.sin(correctionAngle) * idealRadius;
+            }
+
+            // Check checkpoints
+            checkCheckpoints(car);
+
+            // Decrease slow effect
+            if (car.slowEffect > 0) {
+                car.slowEffect--;
+            }
+
+            // AI collect powerups
+            powerups.forEach(powerup => {
+                if (powerup.active) {
+                    const dist = Math.sqrt(
+                        Math.pow(car.x - powerup.x, 2) + 
+                        Math.pow(car.y - powerup.y, 2)
+                    );
+                    if (dist < powerup.radius + car.width / 2) {
+                        powerup.active = false;
+                        powerup.respawnTime = Date.now() + 5000;
+                        
+                        if (powerup.type === 'speed') {
+                            car.maxSpeed *= 1.5;
+                            setTimeout(() => car.maxSpeed /= 1.5, powerup.duration);
+                        }
+                    }
+                }
+            });
+        }
+
+        // Check Checkpoints
+        function checkCheckpoints(car) {
+            track.checkpoints.forEach((cp, i) => {
+                const cpRadius = (track.outerRadius + track.innerRadius) / 2;
+                const cpX = track.centerX + Math.cos(cp.angle) * cpRadius;
+                const cpY = track.centerY + Math.sin(cp.angle) * cpRadius;
+                
+                const dist = Math.sqrt(
+                    Math.pow(car.x - cpX, 2) + 
+                    Math.pow(car.y - cpY, 2)
+                );
+
+                if (dist < 30 && !car.checkpoints[i]) {
+                    car.checkpoints[i] = true;
+                    
+                    // Check if lap completed
+                    if (car.checkpoints.every(cp => cp)) {
+                        car.lap++;
+                        car.checkpoints = [false, false, false, false];
+                        
+                        if (car === player) {
+                            const lapTime = Date.now() - player.currentLapStart;
+                            player.lapTimes.push(lapTime);
+                            player.currentLapStart = Date.now();
+                            player.score += 1000;
+                        }
+                        
+                        if (car.lap > gameState.totalLaps) {
+                            endGame();
+                        }
+                    }
+                }
+            });
+        }
+
+        // Check Powerup Collection
+        function checkPowerups() {
+            powerups.forEach(powerup => {
+                if (powerup.active) {
+                    const dist = Math.sqrt(
+                        Math.pow(player.x - powerup.x, 2) + 
+                        Math.pow(player.y - powerup.y, 2)
+                    );
+                    
+                    if (dist < powerup.radius + player.width / 2) {
+                        powerup.active = false;
+                        powerup.respawnTime = Date.now() + 5000;
+                        
+                        player.powerups.push({
+                            type: powerup.type,
+                            startTime: Date.now(),
+                            duration: powerup.duration
+                        });
+
+                        // Apply powerup effect
+                        if (powerup.type === 'speed') {
+                            player.maxSpeed *= 1.5;
+                            setTimeout(() => player.maxSpeed /= 1.5, powerup.duration);
+                        } else if (powerup.type === 'slow') {
+                            aiCars.forEach(ai => ai.slowEffect = 180);
+                        }
+
+                        player.score += 500;
+                    }
+                }
+            });
+
+            // Respawn powerups
+            powerups.forEach(powerup => {
+                if (!powerup.active && Date.now() > powerup.respawnTime) {
+                    powerup.active = true;
+                }
+            });
+        }
+
+        // Check Obstacle Collision
+        function checkObstacles() {
+            obstacles.forEach(obstacle => {
+                const dist = Math.sqrt(
+                    Math.pow(player.x - obstacle.x, 2) + 
+                    Math.pow(player.y - obstacle.y, 2)
+                );
+                
+                if (dist < obstacle.radius + player.width / 2) {
+                    if (!player.powerups.some(p => p.type === 'shield')) {
+                        player.speed *= 0.3;
+                        player.score = Math.max(0, player.score - 200);
+                    }
+                }
+            });
+        }
+
+        // Update Leaderboard
+        function updateLeaderboard() {
+            const allRacers = [
+                { ...player, name: 'YOU', isPlayer: true },
+                ...aiCars
+            ].sort((a, b) => {
+                if (b.lap !== a.lap) return b.lap - a.lap;
+                const aProgress = a.checkpoints.filter(cp => cp).length;
+                const bProgress = b.checkpoints.filter(cp => cp).length;
+                return bProgress - aProgress;
+            });
+
+            const racerListHTML = allRacers.map((racer, index) => {
+                const className = racer.isPlayer ? 'racer-item racer-player' : 'racer-item racer-ai';
+                return `
+                    <div class="${className}">
+                        <span>${index + 1}. ${racer.name}</span>
+                        <span>Lap ${racer.lap}</span>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('racerList').innerHTML = racerListHTML;
+
+            // Update player position
+            const playerPosition = allRacers.findIndex(r => r.isPlayer) + 1;
+            document.getElementById('positionStat').textContent = `${playerPosition}/${allRacers.length}`;
+        }
+
+        // Update Stats
+        function updateStats() {
+            document.getElementById('speedStat').textContent = Math.floor(player.speed * 20) + ' km/h';
+            document.getElementById('lapStat').textContent = `${player.lap}/${gameState.totalLaps}`;
+            document.getElementById('scoreStat').textContent = player.score;
+            
+            if (player.lapTimes.length > 0) {
+                const bestLap = Math.min(...player.lapTimes);
+                const minutes = Math.floor(bestLap / 60000);
+                const seconds = ((bestLap % 60000) / 1000).toFixed(2);
+                document.getElementById('bestLapStat').textContent = 
+                    `${minutes}:${seconds.padStart(5, '0')}`;
+            }
+
+            // Update powerups display
+            const powerupHTML = player.powerups.map(p => {
+                const remaining = Math.ceil((p.duration - (Date.now() - p.startTime)) / 1000);
+                return `<div class="powerup-item">${p.type.toUpperCase()} (${remaining}s)</div>`;
+            }).join('');
+            document.getElementById('powerupList').innerHTML = powerupHTML || '<div style="color: #888;">No active powerups</div>';
+        }
+
+        // Game Loop
+        function gameLoop() {
+            if (!gameState.running || gameState.paused) return;
+
+            // Clear canvas
+            ctx.fillStyle = '#2d3436';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw everything
+            drawTrack();
+            drawObstacles();
+            drawPowerups();
+            
+            // Update and draw AI cars
+            if (gameState.aiEnabled) {
+                aiCars.forEach(car => {
+                    updateAI(car);
+                    drawCar(car, false);
+                });
+            }
+
+            // Update and draw player
+            updatePlayer();
+            checkPowerups();
+            checkObstacles();
+            drawCar(player, true);
+
+            // Update UI
+            updateStats();
+            updateLeaderboard();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Keyboard Controls
+        const keys = {};
+        window.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+
+            if (keys['ArrowUp']) {
+                if (player.speed < player.maxSpeed) {
+                    player.speed += player.acceleration;
+                }
+            }
+            if (keys['ArrowDown']) {
+                player.speed *= 0.9;
+            }
+            if (keys['ArrowLeft']) {
+                player.angle -= player.turnSpeed;
+            }
+            if (keys['ArrowRight']) {
+                player.angle += player.turnSpeed;
+            }
+            if (keys[' '] && player.boost > 20) {
+                player.speed = Math.min(player.speed * 1.5, player.maxSpeed * 1.5);
+                player.boost -= 20;
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        // Game Functions
+        function startGame() {
+            if (!gameState.running) {
+                gameState.running = true;
+                gameState.paused = false;
+                initAICars();
+                initPowerups();
+                initObstacles();
+                player.currentLapStart = Date.now();
+                gameLoop();
+            }
+        }
+
+        function pauseGame() {
+            gameState.paused = !gameState.paused;
+            if (!gameState.paused) {
+                gameLoop();
+            }
+        }
+
+        function resetGame() {
+            gameState.running = false;
+            gameState.paused = false;
+            
+            player.x = 100;
+            player.y = 300;
+            player.speed = 0;
+            player.angle = 0;
+            player.lap = 1;
+            player.checkpoints = [false, false, false, false];
+            player.lapTimes = [];
+            player.score = 0;
+            player.boost = 100;
+            player.powerups = [];
+            
+            document.getElementById('gameOver').style.display = 'none';
+            initAICars();
+            initPowerups();
+            initObstacles();
+            
+            ctx.fillStyle = '#2d3436';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            drawTrack();
+            drawCar(player, true);
+        }
+
+        function toggleAI() {
+            gameState.aiEnabled = !gameState.aiEnabled;
+        }
+
+        function setDifficulty(level) {
+            gameState.difficulty = level;
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            if (gameState.running) {
+                resetGame();
+            }
+        }
+
+        function endGame() {
+            gameState.running = false;
+            
+            const totalTime = player.lapTimes.reduce((a, b) => a + b, 0);
+            const avgLap = totalTime / player.lapTimes.length;
+            const bestLap = Math.min(...player.lapTimes);
+            
+            const formatTime = (ms) => {
+                const minutes = Math.floor(ms / 60000);
+                const seconds = ((ms % 60000) / 1000).toFixed(2);
+                return `${minutes}:${seconds.padStart(5, '0')}`;
+            };
+
+            const allRacers = [
+                { ...player, name: 'YOU' },
+                ...aiCars
+            ].sort((a, b) => b.lap - a.lap);
+            
+            const position = allRacers.findIndex(r => r.name === 'YOU') + 1;
+
+            document.getElementById('finalStats').innerHTML = `
+                <div style="font-size: 2em; margin: 20px 0;">
+                    ${position === 1 ? '🥇' : position === 2 ? '🥈' : position === 3 ? '🥉' : '🏁'} 
+                    Position: ${position}/${allRacers.length}
+                </div>
+                <div style="margin: 10px 0;">Total Score: ${player.score}</div>
+                <div style="margin: 10px 0;">Best Lap: ${formatTime(bestLap)}</div>
+                <div style="margin: 10px 0;">Average Lap: ${formatTime(avgLap)}</div>
+                <div style="margin: 10px 0;">Total Time: ${formatTime(totalTime)}</div>
+            `;
+            
+            document.getElementById('gameOver').style.display = 'block';
+        }
+
+        // Initialize
+        resetGame();
+    </script>
+</body>
+</html>
